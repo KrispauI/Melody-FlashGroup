@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+  mysql:
+    image: mysql:8.0.32
+    container_name: mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - TZ=Asia/Shanghai
+    command:
+      --bind-address=0.0.0.0
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p123456"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+#  # Zookeeper 服务
+#  zookeeper:
+#    image: zookeeper:3.4.14
+#    container_name: zookeeper
+#    restart: always
+#    ports:
+#      - "2181:2181"
+#
+#
+#  # Kafka 服务
+#  kafka:
+#    image: wurstmeister/kafka
+#    container_name: kafka
+#    restart: always
+#    environment:
+#      KAFKA_ADVERTISED_HOST_NAME: 192.168.112.129      # 必须替换为宿主机实际IP
+#      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"        # 使用服务名替代IP
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${KAFKA_ADVERTISED_HOST_NAME}:9092
+#      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+#      KAFKA_HEAP_OPTS: "-Xmx256M -Xms256M"
+#    depends_on:
+#      - zookeeper
+#    ports:
+#      - "9092:9092"
+
+volumes:
+  redis_data:
+  mysql_data:
+
+networks:
+  default:
+    name: app_net
+
