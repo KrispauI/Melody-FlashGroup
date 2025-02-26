@@ -24,6 +24,6 @@ public class MvcConfig implements WebMvcConfigurer {
             ).order(1);
             
         registry.addInterceptor(refreshTokenInterceptor)
-            .excludePathPatterns("/**").order(0);
+            .addPathPatterns("/**").order(0);
     }
 }
